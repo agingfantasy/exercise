@@ -166,13 +166,30 @@ def normalize(prob_list):
 
 def color_map_gen(color_map, bg_map):
     m = color_map
+    bomb_prob = np.random.randint(3, 10) # 3% ~ 15%
+    total_color_count = 0
+    # generates basic color scheme
     for r in range(color_map.shape[0]):
         for c in range(color_map.shape[1]):
             if bg_map[(r, c)] in (1, 2, 3) and color_map[(r, c)] == 0:
                 m[(r, c)] = np.random.randint(1, len(ColorState) + 1)
+                total_color_count += 1
                 while r > 1 and m[(r-2, c)] == m[(r-1, c)] == m[(r, c)] or \
                     c > 1 and m[(r, c-2)] == m[(r, c-1)] and m[(r, c-1)] == m[(r, c)]:
                     m[(r, c)] = np.random.randint(1, len(ColorState) + 1)
+    # add bomb according to bomb probability
+    for i in range(total_color_count * bomb_prob / 100):
+        spot_ok = False
+        while not spot_ok:
+            # pick a location, bg in [1, 2, 3]
+            row = np.random.randint(0, color_map.shape[0])
+            col = np.random.randint(0, color_map.shape[1])
+            if bg_map[(row, col)] in (1, 2, 3) and color_map[(row, col)] not in (6, 7, 8, 9):
+                # pick a bomb
+                color_map[(row, col)] = np.random.randint(6, 10)
+                spot_ok = True
+            else:
+                continue
     return m
 
 
